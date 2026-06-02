@@ -33,7 +33,7 @@ jobs:
       working-directory: ${{ matrix.service }}
 
   build:
-    name: Build Image — ${{ matrix.service }}
+    name: Build & Scan — ${{ matrix.service }}
     runs-on: ubuntu-latest
     needs: test
     strategy:
@@ -60,12 +60,18 @@ jobs:
         exit-code: '0'
 
   push:
-    name: Push to ECR (requires AWS secrets)
+    name: Push to ECR
     runs-on: ubuntu-latest
     needs: build
-    if: |
-      github.ref == 'refs/heads/main' &&
-      secrets.AWS_ACCESS_KEY_ID != ''
+    if: github.ref == 'refs/heads/main'
     steps:
-    - name: Skipped — AWS secrets not configured
-      run: echo "Configure AWS_ACCESS_KEY_ID, AWS_SECRET_ACCESS_KEY, AWS_ACCOUNT_ID, AWS_REGION secrets to enable push"
+    - name: AWS secrets required
+      run: |
+        echo "=================================================="
+        echo "  To enable ECR push, add these GitHub secrets:"
+        echo "  AWS_ACCESS_KEY_ID"
+        echo "  AWS_SECRET_ACCESS_KEY"
+        echo "  AWS_ACCOUNT_ID"
+        echo "  AWS_REGION"
+        echo "  See README for setup instructions"
+        echo "=================================================="
