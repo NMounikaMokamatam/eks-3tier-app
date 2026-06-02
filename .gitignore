@@ -1,0 +1,12 @@
+node_modules/
+dist/
+.env
+.env.local
+*.tfvars
+!terraform.tfvars.example
+**/.terraform/
+*.tfstate
+*.tfstate.*
+*.tfplan
+.DS_Store
+coverage/

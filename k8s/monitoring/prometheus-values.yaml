@@ -1,0 +1,50 @@
+prometheus:
+  prometheusSpec:
+    retention: 15d
+    retentionSize: "10GB"
+    resources:
+      requests:
+        cpu: 300m
+        memory: 512Mi
+      limits:
+        cpu: 1
+        memory: 2Gi
+    storageSpec:
+      volumeClaimTemplate:
+        spec:
+          storageClassName: gp2
+          accessModes: ["ReadWriteOnce"]
+          resources:
+            requests:
+              storage: 20Gi
+
+grafana:
+  enabled: true
+  adminPassword: admin
+  service:
+    type: ClusterIP
+  dashboards:
+    default:
+      kubernetes-cluster:
+        gnetId: 7249
+        revision: 1
+        datasource: Prometheus
+      nodejs:
+        gnetId: 11159
+        revision: 1
+        datasource: Prometheus
+
+alertmanager:
+  config:
+    global:
+      slack_api_url: "https://hooks.slack.com/services/REPLACE_WITH_YOUR_WEBHOOK"
+    route:
+      group_by: ['alertname', 'namespace']
+      receiver: slack-notifications
+    receivers:
+    - name: slack-notifications
+      slack_configs:
+      - channel: '#alerts'
+        send_resolved: true
+        title: '[{{ .Status | toUpper }}] {{ .CommonLabels.alertname }}'
+        text: '{{ range .Alerts }}{{ .Annotations.summary }}\n{{ end }}'
